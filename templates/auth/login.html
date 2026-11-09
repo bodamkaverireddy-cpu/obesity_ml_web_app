@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Login - Obesity Risk Prediction{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+<style>
+.auth-page-hero {
+    background: radial-gradient(circle at top left, #ff8a80 0, rgba(233, 30, 99, 0.9) 38%, #4a148c 100%);
+    min-height: calc(100vh - 120px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.auth-page-hero-inner {
+    max-width: 1200px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 40px;
+    align-items: center;
+}
+
+.auth-hero-copy h1 {
+    color: #ffffff;
+    font-size: 3.2rem;
+    font-weight: 800;
+    margin-bottom: 14px;
+}
+
+.auth-hero-copy p.lead {
+    color: #ffebf2;
+    font-size: 1.2rem;
+    max-width: 520px;
+    margin-bottom: 22px;
+}
+
+.auth-hero-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.auth-hero-badge {
+    background: rgba(5, 5, 25, 0.38);
+    border-radius: 999px;
+    padding: 8px 16px;
+    color: #fce4ec;
+    font-size: 0.95rem;
+}
+
+.auth-hero-badge span {
+    font-weight: 700;
+    color: #ffeb3b;
+}
+
+@media (max-width: 900px) {
+    .auth-page-hero-inner {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-page-hero">
+    <div class="auth-page-hero-inner">
+        <div class="auth-hero-copy">
+            <h1>Obesity Risk Prediction</h1>
+            <p class="lead">
+                Secure access to your analytics workspace. Upload datasets, train tuned models,
+                and generate professional obesity risk reports from a single dashboard.
+            </p>
+            <div class="auth-hero-badges">
+                <div class="auth-hero-badge"><span>SMOTE</span> balanced training</div>
+                <div class="auth-hero-badge"><span>4+</span> ML algorithms</div>
+                <div class="auth-hero-badge"><span>PDF</span> insights & reporting</div>
+            </div>
+        </div>
+        <div class="auth-container">
+            <div class="auth-box">
+                <div class="auth-header">
+                    <h1>Login</h1>
+                    <p class="auth-subtitle">Sign in to continue</p>
+                </div>
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" required placeholder="Enter your username">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required placeholder="Enter your password">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-large">Sign In</button>
+                </form>
+                <p class="auth-link">Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

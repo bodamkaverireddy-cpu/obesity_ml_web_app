@@ -1,0 +1,462 @@
+{% extends "base.html" %}
+{% block title %}EDA - Obesity Risk Prediction{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<style>
+    .eda-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    .summary-card {
+        background: linear-gradient(135deg, #E91E63 0%, #C2185B 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(233, 30, 99, 0.2);
+    }
+    .summary-card h3 {
+        margin: 0 0 10px 0;
+        font-size: 14px;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .summary-card p {
+        margin: 0;
+        font-size: 24px;
+        font-weight: bold;
+    }
+    .missing-values-section {
+        margin: 30px 0;
+    }
+    .missing-handling-card {
+        background: #f8f9fa;
+        border-left: 4px solid #E91E63;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 5px;
+    }
+    .skewness-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+        margin-left: 10px;
+    }
+    .skewness-normal {
+        background: #28a745;
+        color: white;
+    }
+    .skewness-right {
+        background: #ffc107;
+        color: #000;
+    }
+    .skewness-left {
+        background: #17a2b8;
+        color: white;
+    }
+    .distribution-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 30px;
+        margin: 30px 0;
+    }
+    .chart-card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .chart-card h4 {
+        margin-top: 0;
+        color: #333;
+        border-bottom: 2px solid #E91E63;
+        padding-bottom: 10px;
+    }
+    
+    /* EDA Triggering Questions Styles */
+    .triggering-questions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+        gap: 30px;
+        margin: 30px 0;
+    }
+    
+    .question-card {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(233, 30, 99, 0.15);
+        border-top: 4px solid #E91E63;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .question-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(233, 30, 99, 0.25);
+    }
+    
+    .question-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .question-number {
+        background: linear-gradient(135deg, #E91E63 0%, #C2185B 100%);
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+    
+    .question-header h3 {
+        margin: 0;
+        color: #E91E63;
+        font-size: 1.2rem;
+        font-weight: 600;
+        line-height: 1.4;
+    }
+    
+    .question-vars {
+        color: #666;
+        font-size: 0.95rem;
+        margin-bottom: 15px;
+        padding: 10px;
+        background-color: #FFF0F5;
+        border-radius: 5px;
+        border-left: 3px solid #E91E63;
+    }
+    
+    .chart-wrapper {
+        margin-top: 15px;
+        text-align: center;
+    }
+    
+    .chart-wrapper .chart-image {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .correlation-section {
+        margin: 30px 0;
+    }
+    .high-correlation-list {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: 5px;
+        padding: 15px;
+        margin: 15px 0;
+    }
+    .high-correlation-item {
+        padding: 8px;
+        margin: 5px 0;
+        background: white;
+        border-radius: 3px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1>Exploratory Data Analysis</h1>
+    
+    <div class="eda-section">
+        <!-- Data Summary -->
+        <div class="section-divider">
+            <h2>📊 Data Summary</h2>
+        </div>
+        
+        <div class="eda-summary-grid">
+            <div class="summary-card">
+                <h3>Dataset Shape</h3>
+                <p>{{ shape[0] }} × {{ shape[1] }}</p>
+                <small>Rows × Columns</small>
+            </div>
+            <div class="summary-card">
+                <h3>Total Features</h3>
+                <p>{{ columns|length }}</p>
+            </div>
+            {% if stats %}
+            <div class="summary-card">
+                <h3>Numerical Features</h3>
+                <p>{{ stats.numerical_features }}</p>
+            </div>
+            <div class="summary-card">
+                <h3>Categorical Features</h3>
+                <p>{{ stats.categorical_features }}</p>
+            </div>
+            {% endif %}
+            {% if eda_results.duplicate_rows %}
+            <div class="summary-card">
+                <h3>Duplicate Rows</h3>
+                <p>{{ eda_results.duplicate_rows }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Shape of the Data -->
+        <div class="section-divider">
+            <h2>📐 Shape of the Data</h2>
+        </div>
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>Rows</h3>
+                <p>{{ shape[0] }}</p>
+            </div>
+            <div class="info-card">
+                <h3>Columns</h3>
+                <p>{{ shape[1] }}</p>
+            </div>
+            <div class="info-card">
+                <h3>Total Cells</h3>
+                <p>{{ shape[0] * shape[1] }}</p>
+            </div>
+        </div>
+
+        <!-- Missing Values -->
+        <div class="section-divider">
+            <h2>🔍 Missing Values Analysis</h2>
+        </div>
+        
+        <div class="missing-values-section">
+            {% if eda_results.missing_values %}
+            <h3>Missing Values Summary</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Column</th>
+                        <th>Missing Count</th>
+                        <th>Missing Percentage</th>
+                        <th>Data Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for col, count in eda_results.missing_values.items() %}
+                    {% if count > 0 %}
+                    <tr>
+                        <td><strong>{{ col }}</strong></td>
+                        <td>{{ count }}</td>
+                        <td>{{ eda_results.missing_percentage[col] }}%</td>
+                        <td>{{ eda_results.data_types[col] }}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                    {% if eda_results.missing_values.values()|sum == 0 %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: green;">
+                            <strong>✓ No missing values found in the dataset!</strong>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+
+            <!-- Missing Values Handling Recommendations -->
+            {% if eda_results.missing_handling %}
+            <h3 style="margin-top: 30px;">Missing Values Handling Recommendations</h3>
+            {% for col, handling in eda_results.missing_handling.items() %}
+            {% if handling.missing_percentage > 0 %}
+            <div class="missing-handling-card">
+                <h4>{{ col }} ({{ handling.missing_percentage }}% missing)</h4>
+                <p><strong>Recommended Method:</strong> {{ handling.imputation_method }}</p>
+                <p><strong>Suggestion:</strong> {{ handling.recommendation }}</p>
+            </div>
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+            {% endif %}
+        </div>
+
+        <!-- EDA Triggering Questions Section -->
+        {% if triggering_charts %}
+        <div class="section-divider">
+            <h2>🔍 EDA Triggering Questions with Unique Chart Types (12)</h2>
+            <p>Comprehensive analysis using 12 different visualization techniques</p>
+        </div>
+        
+        <div class="triggering-questions-grid">
+            <!-- Question 1: Stacked Bar Chart -->
+            {% if triggering_charts.q1_stacked_bar %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">1</span>
+                    <h3>How does obesity category vary across different genders?</h3>
+                </div>
+                <p class="question-vars"><strong>Variables:</strong> Gender, Obesity Category | <strong>Chart Type:</strong> Stacked Bar Chart</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ triggering_charts.q1_stacked_bar }}" alt="Q1: Stacked Bar Chart" class="chart-image">
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 2: Box Plot -->
+            {% if triggering_charts.q2_boxplot %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">2</span>
+                    <h3>What is the distribution of age across obesity categories?</h3>
+                </div>
+                <p class="question-vars"><strong>Variables:</strong> Age, Obesity Category | <strong>Chart Type:</strong> Box Plot</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ triggering_charts.q2_boxplot }}" alt="Q2: Box Plot" class="chart-image">
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 3: Scatter Plot -->
+            {% if triggering_charts.q3_scatter %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">3</span>
+                    <h3>How do height and weight jointly differentiate obesity categories?</h3>
+                </div>
+                <p class="question-vars"><strong>Variables:</strong> Height, Weight, Obesity Category | <strong>Chart Type:</strong> Scatter Plot (color-coded)</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ triggering_charts.q3_scatter }}" alt="Q3: Scatter Plot" class="chart-image">
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 4: Grouped Bar Chart -->
+            {% if triggering_charts.q4_grouped_bar %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">4</span>
+                    <h3>Does family history of overweight increase obesity risk?</h3>
+                </div>
+                <p class="question-vars"><strong>Variables:</strong> family_history_with_overweight, Obesity Category | <strong>Chart Type:</strong> Grouped Bar Chart</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ triggering_charts.q4_grouped_bar }}" alt="Q4: Grouped Bar Chart" class="chart-image">
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 5: Mosaic Plot -->
+            {% if triggering_charts.q5_mosaic %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">5</span>
+                    <h3>How does frequent consumption of high-calorie food affect obesity levels?</h3>
+                </div>
+                <p class="question-vars"><strong>Variables:</strong> FAVC, Obesity Category | <strong>Chart Type:</strong> Mosaic Plot</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ triggering_charts.q5_mosaic }}" alt="Q5: Mosaic Plot" class="chart-image">
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 6: Violin Plot -->
+            {% if triggering_charts.q6_violin %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">6</span>
+                    <h3>Is vegetable consumption frequency associated with obesity status?</h3>
+                </div>
+                <p class="question-vars"><strong>Variables:</strong> FCVC, Obesity Category | <strong>Chart Type:</strong> Violin Plot</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ triggering_charts.q6_violin }}" alt="Q6: Violin Plot" class="chart-image">
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 7: Strip Plot -->
+            {% if triggering_charts.q7_strip %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">7</span>
+                    <h3>Does the number of main meals per day influence obesity category?</h3>
+                </div>
+                <p class="question-vars"><strong>Variables:</strong> NCP, Obesity Category | <strong>Chart Type:</strong> Strip Plot</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ triggering_charts.q7_strip }}" alt="Q7: Strip Plot" class="chart-image">
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 8: Heatmap -->
+            {% if triggering_charts.q8_heatmap %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">8</span>
+                    <h3>How does eating between meals relate to obesity categories?</h3>
+                </div>
+                <p class="question-vars"><strong>Variables:</strong> CAEC, Obesity Category | <strong>Chart Type:</strong> Heatmap (normalized counts)</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ triggering_charts.q8_heatmap }}" alt="Q8: Heatmap" class="chart-image">
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 9: Line Plot -->
+            {% if triggering_charts.q9_line %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">9</span>
+                    <h3>Is daily water intake linked to obesity levels?</h3>
+                </div>
+                <p class="question-vars"><strong>Variables:</strong> CH2O, Obesity Category | <strong>Chart Type:</strong> Line Plot (mean trend)</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ triggering_charts.q9_line }}" alt="Q9: Line Plot" class="chart-image">
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 10: Radar Chart -->
+            {% if triggering_charts.q10_radar %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">10</span>
+                    <h3>How does physical activity frequency affect obesity classification?</h3>
+                </div>
+                <p class="question-vars"><strong>Variables:</strong> FAF, Obesity Category | <strong>Chart Type:</strong> Radar / Spider Chart</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ triggering_charts.q10_radar }}" alt="Q10: Radar Chart" class="chart-image">
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 11: Density Plot -->
+            {% if triggering_charts.q11_density %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">11</span>
+                    <h3>Does screen/technology usage time impact obesity risk?</h3>
+                </div>
+                <p class="question-vars"><strong>Variables:</strong> TUE, Obesity Category | <strong>Chart Type:</strong> Density Plot (KDE)</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ triggering_charts.q11_density }}" alt="Q11: Density Plot" class="chart-image">
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 12: Treemap -->
+            {% if triggering_charts.q12_treemap %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">12</span>
+                    <h3>Are transportation modes associated with different obesity categories?</h3>
+                </div>
+                <p class="question-vars"><strong>Variables:</strong> MTRANS, Obesity Category | <strong>Chart Type:</strong> Treemap</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ triggering_charts.q12_treemap }}" alt="Q12: Treemap" class="chart-image">
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

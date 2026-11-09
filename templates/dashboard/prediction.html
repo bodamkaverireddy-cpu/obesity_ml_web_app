@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}Prediction - Obesity Risk Prediction{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1>Make Prediction</h1>
+    
+    <div class="prediction-section">
+        <form method="POST" class="prediction-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="Gender">Gender</label>
+                    <select id="Gender" name="Gender" required>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="Age">Age</label>
+                    <input type="number" id="Age" name="Age" step="0.1" placeholder="e.g., 25" required>
+                </div>
+                <div class="form-group">
+                    <label for="Height">Height (m)</label>
+                    <input type="number" id="Height" name="Height" step="0.01" placeholder="e.g., 1.75" required>
+                </div>
+                <div class="form-group">
+                    <label for="Weight">Weight (kg)</label>
+                    <input type="number" id="Weight" name="Weight" step="0.1" placeholder="e.g., 70" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="family_history_with_overweight">Family History</label>
+                    <select id="family_history_with_overweight" name="family_history_with_overweight" required>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="FAVC">Frequent Caloric Food</label>
+                    <select id="FAVC" name="FAVC" required>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="FCVC">Vegetables Consumption</label>
+                    <input type="number" id="FCVC" name="FCVC" min="1" max="3" step="0.1" placeholder="e.g., 2 (scale: 1-3)" required>
+                </div>
+                <div class="form-group">
+                    <label for="NCP">Number of Meals</label>
+                    <input type="number" id="NCP" name="NCP" min="1" max="4" step="0.1" placeholder="e.g., 3 (meals per day)" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="CAEC">Food Between Meals</label>
+                    <select id="CAEC" name="CAEC" required>
+                        <option value="no">No</option>
+                        <option value="Sometimes">Sometimes</option>
+                        <option value="Frequently">Frequently</option>
+                        <option value="Always">Always</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="SMOKE">Smoke</label>
+                    <select id="SMOKE" name="SMOKE" required>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="CH2O">Water Consumption</label>
+                    <input type="number" id="CH2O" name="CH2O" min="1" max="3" step="0.1" placeholder="e.g., 2 (scale: 1-3)" required>
+                </div>
+                <div class="form-group">
+                    <label for="SCC">Calories Monitoring</label>
+                    <select id="SCC" name="SCC" required>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="FAF">Physical Activity</label>
+                    <input type="number" id="FAF" name="FAF" min="0" max="3" step="0.1" placeholder="e.g., 1.5 (scale: 0-3)" required>
+                </div>
+                <div class="form-group">
+                    <label for="TUE">Technology Use</label>
+                    <input type="number" id="TUE" name="TUE" min="0" max="2" step="0.1" placeholder="e.g., 1 (scale: 0-2)" required>
+                </div>
+                <div class="form-group">
+                    <label for="CALC">Alcohol Consumption</label>
+                    <select id="CALC" name="CALC" required>
+                        <option value="no">No</option>
+                        <option value="Sometimes">Sometimes</option>
+                        <option value="Frequently">Frequently</option>
+                        <option value="Always">Always</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="MTRANS">Transportation</label>
+                    <select id="MTRANS" name="MTRANS" required>
+                        <option value="Public_Transportation">Public Transportation</option>
+                        <option value="Walking">Walking</option>
+                        <option value="Automobile">Automobile</option>
+                        <option value="Motorbike">Motorbike</option>
+                        <option value="Bike">Bike</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="model_type">Model</label>
+                <select id="model_type" name="model_type" required>
+                    <option value="xgboost">XGBoost</option>
+                    <option value="random_forest">Random Forest Classifier</option>
+                    <option value="svm">Support Vector Machine (SVM)</option>
+                    <option value="stacking">Stacking Ensemble</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-large">Predict</button>
+        </form>
+        
+        {% if prediction %}
+        <div class="prediction-result">
+            <h2>Prediction Summary</h2>
+            <div class="result-card">
+                <h3>Predicted Obesity Category: {{ prediction.prediction }}</h3>
+                <p><strong>Overall Risk Level:</strong> {{ prediction.risk_level }}</p>
+                <p><strong>Model Confidence:</strong> {{ prediction.confidence }}%</p>
+                <p><strong>Model Used:</strong> {{ prediction.model_used }}</p>
+                {% if prediction.bmi %}
+                <p><strong>Calculated BMI:</strong> {{ prediction.bmi }} ({{ prediction.bmi_category }})</p>
+                {% endif %}
+
+                <h4>Clinical Interpretation</h4>
+                <p>{{ prediction.interpretation }}</p>
+
+                {% if prediction.recommendations %}
+                <h4>Personalised Lifestyle Recommendations</h4>
+                <ul>
+                    {% for rec in prediction.recommendations %}
+                    <li>{{ rec }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+
+            <div class="result-card">
+                <h3>Probability Distribution</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Probability</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category, prob in prediction.probabilities.items() %}
+                        <tr>
+                            <td>{{ category }}</td>
+                            <td>{{ "%.2f"|format(prob * 100) }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

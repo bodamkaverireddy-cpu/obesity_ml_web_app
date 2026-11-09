@@ -1,0 +1,389 @@
+{% extends "base.html" %}
+{% block title %}Visualizations - Obesity Risk Prediction{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<style>
+    .visualization-questions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+        gap: 30px;
+        margin: 30px 0;
+    }
+    
+    .question-card {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(233, 30, 99, 0.15);
+        border-top: 4px solid #E91E63;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .question-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(233, 30, 99, 0.25);
+    }
+    
+    .question-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .question-number {
+        background: linear-gradient(135deg, #E91E63 0%, #C2185B 100%);
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+    
+    .question-header h3 {
+        margin: 0;
+        color: #E91E63;
+        font-size: 1.2rem;
+        font-weight: 600;
+        line-height: 1.4;
+    }
+    
+    .question-vars {
+        color: #666;
+        font-size: 0.95rem;
+        margin-bottom: 15px;
+        padding: 10px;
+        background-color: #FFF0F5;
+        border-radius: 5px;
+        border-left: 3px solid #E91E63;
+    }
+    
+    .chart-wrapper {
+        margin-top: 15px;
+        text-align: center;
+    }
+    
+    .chart-wrapper .chart-image {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .interpretation-box {
+        margin-top: 15px;
+        padding: 12px 15px;
+        background: linear-gradient(135deg, #FFF0F5 0%, #FFE4E1 100%);
+        border-left: 4px solid #E91E63;
+        border-radius: 5px;
+        font-size: 0.95rem;
+        color: #333;
+        line-height: 1.6;
+    }
+    
+    .interpretation-box strong {
+        color: #E91E63;
+    }
+    
+    .section-divider {
+        margin: 40px 0 30px 0;
+        padding-bottom: 15px;
+        border-bottom: 3px solid #E91E63;
+    }
+    
+    .section-divider h2 {
+        color: #E91E63;
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+    }
+    
+    .section-divider p {
+        color: #666;
+        font-size: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1>📊 Data Visualizations</h1>
+    
+    <div class="eda-section">
+        <!-- Visualization Questions Section -->
+        {% if visualization_charts %}
+        <div class="section-divider">
+            <h2>🔍 Data Visualization Questions with Unique Chart Types (15)</h2>
+            <p>Comprehensive analysis using 15 different visualization techniques</p>
+        </div>
+        
+        <div class="visualization-questions-grid">
+            <!-- Question 1: Bar Chart -->
+            {% if visualization_charts.v1_bar %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">1</span>
+                    <h3>How are individuals distributed across different Obesity Categories?</h3>
+                </div>
+                <p class="question-vars"><strong>Chart Type:</strong> Bar Chart</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ visualization_charts.v1_bar.chart }}" alt="Q1: Bar Chart" class="chart-image">
+                </div>
+                <div class="interpretation-box">
+                    <strong>📊 Interpretation:</strong> {{ visualization_charts.v1_bar.interpretation }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 2: Stacked Bar Chart -->
+            {% if visualization_charts.v2_stacked_bar %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">2</span>
+                    <h3>How does Gender influence the distribution of Obesity Categories?</h3>
+                </div>
+                <p class="question-vars"><strong>Chart Type:</strong> Stacked Bar Chart</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ visualization_charts.v2_stacked_bar.chart }}" alt="Q2: Stacked Bar Chart" class="chart-image">
+                </div>
+                <div class="interpretation-box">
+                    <strong>📊 Interpretation:</strong> {{ visualization_charts.v2_stacked_bar.interpretation }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 3: Box Plot -->
+            {% if visualization_charts.v3_boxplot %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">3</span>
+                    <h3>How does Age vary across different Obesity Categories?</h3>
+                </div>
+                <p class="question-vars"><strong>Chart Type:</strong> Box Plot</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ visualization_charts.v3_boxplot.chart }}" alt="Q3: Box Plot" class="chart-image">
+                </div>
+                <div class="interpretation-box">
+                    <strong>📊 Interpretation:</strong> {{ visualization_charts.v3_boxplot.interpretation }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 4: Scatter Plot -->
+            {% if visualization_charts.v4_scatter %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">4</span>
+                    <h3>What is the relationship between Height and Weight across Obesity Categories?</h3>
+                </div>
+                <p class="question-vars"><strong>Chart Type:</strong> Scatter Plot (colored by Obesity Category)</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ visualization_charts.v4_scatter.chart }}" alt="Q4: Scatter Plot" class="chart-image">
+                </div>
+                <div class="interpretation-box">
+                    <strong>📊 Interpretation:</strong> {{ visualization_charts.v4_scatter.interpretation }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 5: Grouped Bar Chart -->
+            {% if visualization_charts.v5_grouped_bar %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">5</span>
+                    <h3>Does family history of overweight increase the likelihood of higher Obesity Categories?</h3>
+                </div>
+                <p class="question-vars"><strong>Chart Type:</strong> Grouped Bar Chart</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ visualization_charts.v5_grouped_bar.chart }}" alt="Q5: Grouped Bar Chart" class="chart-image">
+                </div>
+                <div class="interpretation-box">
+                    <strong>📊 Interpretation:</strong> {{ visualization_charts.v5_grouped_bar.interpretation }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 6: Percentage Bar Chart -->
+            {% if visualization_charts.v6_percentage_bar %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">6</span>
+                    <h3>How does frequent consumption of high-calorie food (FAVC) differ across Obesity Categories?</h3>
+                </div>
+                <p class="question-vars"><strong>Chart Type:</strong> Percentage Bar Chart</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ visualization_charts.v6_percentage_bar.chart }}" alt="Q6: Percentage Bar Chart" class="chart-image">
+                </div>
+                <div class="interpretation-box">
+                    <strong>📊 Interpretation:</strong> {{ visualization_charts.v6_percentage_bar.interpretation }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 7: Violin Plot -->
+            {% if visualization_charts.v7_violin %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">7</span>
+                    <h3>How does daily vegetable consumption (FCVC) change with Obesity Category?</h3>
+                </div>
+                <p class="question-vars"><strong>Chart Type:</strong> Violin Plot</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ visualization_charts.v7_violin.chart }}" alt="Q7: Violin Plot" class="chart-image">
+                </div>
+                <div class="interpretation-box">
+                    <strong>📊 Interpretation:</strong> {{ visualization_charts.v7_violin.interpretation }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 8: Strip Plot -->
+            {% if visualization_charts.v8_strip %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">8</span>
+                    <h3>How does the number of main meals per day (NCP) vary across Obesity Categories?</h3>
+                </div>
+                <p class="question-vars"><strong>Chart Type:</strong> Strip Plot</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ visualization_charts.v8_strip.chart }}" alt="Q8: Strip Plot" class="chart-image">
+                </div>
+                <div class="interpretation-box">
+                    <strong>📊 Interpretation:</strong> {{ visualization_charts.v8_strip.interpretation }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 9: Mosaic Plot -->
+            {% if visualization_charts.v9_mosaic %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">9</span>
+                    <h3>How do eating habits between meals (CAEC) relate to different Obesity Categories?</h3>
+                </div>
+                <p class="question-vars"><strong>Chart Type:</strong> Mosaic Plot</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ visualization_charts.v9_mosaic.chart }}" alt="Q9: Mosaic Plot" class="chart-image">
+                </div>
+                <div class="interpretation-box">
+                    <strong>📊 Interpretation:</strong> {{ visualization_charts.v9_mosaic.interpretation }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 10: Density Plot -->
+            {% if visualization_charts.v10_density %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">10</span>
+                    <h3>How does daily water consumption (CH2O) differ across Obesity Categories?</h3>
+                </div>
+                <p class="question-vars"><strong>Chart Type:</strong> Density Plot</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ visualization_charts.v10_density.chart }}" alt="Q10: Density Plot" class="chart-image">
+                </div>
+                <div class="interpretation-box">
+                    <strong>📊 Interpretation:</strong> {{ visualization_charts.v10_density.interpretation }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 11: Ridge Plot -->
+            {% if visualization_charts.v11_ridge %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">11</span>
+                    <h3>How does physical activity frequency (FAF) impact Obesity Category distribution?</h3>
+                </div>
+                <p class="question-vars"><strong>Chart Type:</strong> Ridge Plot (Joy Plot)</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ visualization_charts.v11_ridge.chart }}" alt="Q11: Ridge Plot" class="chart-image">
+                </div>
+                <div class="interpretation-box">
+                    <strong>📊 Interpretation:</strong> {{ visualization_charts.v11_ridge.interpretation }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 12: Line Plot -->
+            {% if visualization_charts.v12_line %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">12</span>
+                    <h3>How does time spent using technology devices (TUE) vary across Obesity Categories?</h3>
+                </div>
+                <p class="question-vars"><strong>Chart Type:</strong> Line Plot (mean TUE per Obesity Category)</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ visualization_charts.v12_line.chart }}" alt="Q12: Line Plot" class="chart-image">
+                </div>
+                <div class="interpretation-box">
+                    <strong>📊 Interpretation:</strong> {{ visualization_charts.v12_line.interpretation }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 13: Heatmap -->
+            {% if visualization_charts.v13_heatmap %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">13</span>
+                    <h3>What is the combined effect of alcohol consumption (CALC) and Obesity Category?</h3>
+                </div>
+                <p class="question-vars"><strong>Chart Type:</strong> Heatmap</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ visualization_charts.v13_heatmap.chart }}" alt="Q13: Heatmap" class="chart-image">
+                </div>
+                <div class="interpretation-box">
+                    <strong>📊 Interpretation:</strong> {{ visualization_charts.v13_heatmap.interpretation }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 14: Sankey Diagram -->
+            {% if visualization_charts.v14_sankey %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">14</span>
+                    <h3>How does mode of transportation (MTRANS) influence Obesity Categories?</h3>
+                </div>
+                <p class="question-vars"><strong>Chart Type:</strong> Sankey Diagram</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ visualization_charts.v14_sankey.chart }}" alt="Q14: Sankey Diagram" class="chart-image">
+                </div>
+                <div class="interpretation-box">
+                    <strong>📊 Interpretation:</strong> {{ visualization_charts.v14_sankey.interpretation }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Question 15: Parallel Coordinates Plot -->
+            {% if visualization_charts.v15_parallel %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">15</span>
+                    <h3>Which lifestyle factors most strongly separate Obesity Categories?</h3>
+                </div>
+                <p class="question-vars"><strong>Chart Type:</strong> Parallel Coordinates Plot</p>
+                <div class="chart-wrapper">
+                    <img src="data:image/png;base64,{{ visualization_charts.v15_parallel.chart }}" alt="Q15: Parallel Coordinates Plot" class="chart-image">
+                </div>
+                <div class="interpretation-box">
+                    <strong>📊 Interpretation:</strong> {{ visualization_charts.v15_parallel.interpretation }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
+            <div style="text-align: center; padding: 50px; background: #f8f9fa; border-radius: 10px;">
+                <h3>No visualizations available</h3>
+                <p>Please upload a dataset first to generate visualizations.</p>
+                <a href="{{ url_for('upload') }}" class="btn btn-primary">Upload Dataset</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

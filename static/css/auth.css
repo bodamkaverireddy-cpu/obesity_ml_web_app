@@ -1,0 +1,125 @@
+/* Authentication Pages Styles */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 150px);
+    padding: 40px 20px;
+}
+
+.auth-box {
+    background: white;
+    padding: 60px 50px;
+    border-radius: 20px;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 500px;
+    animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.auth-box h1 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #E91E63;
+    font-size: 3rem;
+    font-weight: 700;
+}
+
+.auth-subtitle {
+    text-align: center;
+    color: #666;
+    font-size: 1.3rem;
+    margin-bottom: 0;
+    font-weight: 300;
+}
+
+.auth-box form {
+    margin-bottom: 30px;
+}
+
+.auth-box .form-group {
+    margin-bottom: 25px;
+}
+
+.auth-box .form-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.auth-box .form-group input {
+    width: 100%;
+    padding: 18px 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    transition: all 0.3s;
+}
+
+.auth-box .form-group input:focus {
+    outline: none;
+    border-color: #E91E63;
+    box-shadow: 0 0 0 4px rgba(233, 30, 99, 0.1);
+    transform: translateY(-2px);
+}
+
+.auth-box .btn-primary {
+    width: 100%;
+    padding: 18px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.auth-link {
+    text-align: center;
+    margin-top: 30px;
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.auth-link a {
+    color: #E91E63;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.auth-link a:hover {
+    text-decoration: underline;
+    color: #C2185B;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .auth-box {
+        padding: 40px 30px;
+    }
+    
+    .auth-box h1 {
+        font-size: 2.5rem;
+    }
+    
+    .auth-subtitle {
+        font-size: 1.1rem;
+    }
+}

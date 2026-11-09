@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Report - Obesity Risk Prediction{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1>Generate Report</h1>
+    <div class="report-section">
+        <p>Click the button below to generate and download a comprehensive PDF report.</p>
+        <a href="{{ url_for('report') }}" class="btn btn-primary btn-large">Generate PDF Report</a>
+    </div>
+</div>
+{% endblock %}
+

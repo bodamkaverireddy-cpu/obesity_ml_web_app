@@ -1,0 +1,32 @@
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="nav-brand">
+            <a href="{{ url_for('home') }}">
+                <span class="brand-icon">📊</span>
+                <span class="brand-text">Obesity Risk Prediction</span>
+            </a>
+        </div>
+        <ul class="nav-menu">
+            <li><a href="{{ url_for('home') }}" class="{% if request.endpoint == 'home' %}active{% endif %}">Home</a></li>
+            <li><a href="{{ url_for('upload') }}" class="{% if request.endpoint == 'upload' %}active{% endif %}">Upload</a></li>
+            <li><a href="{{ url_for('train') }}" class="{% if request.endpoint == 'train' %}active{% endif %}">Train Model</a></li>
+            <li><a href="{{ url_for('eda') }}" class="{% if request.endpoint == 'eda' %}active{% endif %}">EDA</a></li>
+            <li><a href="{{ url_for('visualization') }}" class="{% if request.endpoint == 'visualization' %}active{% endif %}">Visualization</a></li>
+            <li><a href="{{ url_for('predict') }}" class="{% if request.endpoint == 'predict' %}active{% endif %}">Predict</a></li>
+            <li><a href="{{ url_for('report') }}" class="{% if request.endpoint == 'report' %}active{% endif %}">Report</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="secondary-nav">
+    <div class="secondary-nav-container">
+        <div class="nav-search">
+            <span class="search-icon">🔍</span>
+            <span class="search-text">What are you looking for today?</span>
+        </div>
+        <div class="nav-actions">
+            <span class="username-display">👤 {{ session.username }}</span>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+{% block title %}Model Training - Obesity Risk Prediction{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1>Train Machine Learning Models</h1>
+    
+    <div class="training-section">
+        <form method="POST" class="training-form">
+            <div class="form-group">
+                <label for="target_column">Target Column</label>
+                <input type="text" id="target_column" name="target_column" value="Obesity Category" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-large">Start Training</button>
+        </form>
+        
+        <!-- Dataset Preview Section (same as Upload tab) -->
+        {% if table_data %}
+        <div class="dataset-preview-section">
+            <div class="dataset-info">
+                <p><strong>Dataset Preview:</strong> Showing first 50 rows | Total: <strong>{{ num_rows }} rows</strong> and <strong>{{ num_cols }} columns</strong></p>
+            </div>
+            <div class="table-container-wrapper">
+                {{ table_data|safe }}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if training_results %}
+        <div class="training-results-section">
+            
+            <!-- Training Metrics Bar Chart -->
+            {% if training_chart %}
+            <div class="training-chart-section">
+                <h3>Model Training Performance Results</h3>
+                <div class="chart-container">
+                    <img src="data:image/png;base64,{{ training_chart }}" alt="Training Metrics Chart" class="chart-image">
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Algorithm Selection Buttons -->
+            {% if evaluation_results %}
+            <div class="algorithm-selection-section">
+                <h3>Detailed Model Performance Analysis</h3>
+                <div class="algo-buttons-container">
+                    {% for model_name in evaluation_results.keys() %}
+                    <button class="algo-btn" onclick="showAlgoDetails('{{ model_name }}')">{{ model_name|title|replace('_', ' ') }}</button>
+                    {% endfor %}
+                    <button class="algo-btn btn-comparative" onclick="showAlgoDetails('comparative')">Overall Comparative</button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Algorithm Details Container -->
+            {% if evaluation_results %}
+            <div id="algo-details-container" class="algo-details-container">
+                {% for model_name, metrics in evaluation_results.items() %}
+                <div id="details-{{ model_name }}" class="algo-details-content" style="display: none;">
+                    <h4 class="details-title">{{ model_name|title|replace('_', ' ') }} Performance Metrics</h4>
+                    
+                    {% if 'error' in metrics %}
+                    <div class="error-message">{{ metrics.error }}</div>
+                    {% else %}
+                    <div class="metrics-split-view">
+                        <!-- Left Side: Formulas -->
+                        <div class="metrics-formulas-side">
+                            <h5>Metric Formulas</h5>
+                            <div class="formula-item">
+                                <span class="formula-label">Accuracy:</span>
+                                <code class="formula-code">(TP + TN) / (TP + TN + FP + FN)</code>
+                            </div>
+                            <div class="formula-item">
+                                <span class="formula-label">Precision:</span>
+                                <code class="formula-code">TP / (TP + FP)</code>
+                            </div>
+                            <div class="formula-item">
+                                <span class="formula-label">Recall:</span>
+                                <code class="formula-code">TP / (TP + FN)</code>
+                            </div>
+                            <div class="formula-item">
+                                <span class="formula-label">F1-Score:</span>
+                                <code class="formula-code">2 * (Precision * Recall) / (Precision + Recall)</code>
+                            </div>
+                            <div class="formula-item">
+                                <span class="formula-label">ROC-AUC:</span>
+                                <code class="formula-code">Area Under the ROC Curve</code>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Side: Results -->
+                        <div class="metrics-results-side">
+                            <h5>Performance Results</h5>
+                            <div class="result-item">
+                                <span class="result-label">Accuracy:</span>
+                                <span class="result-value">{{ metrics.accuracy }}</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Precision:</span>
+                                <span class="result-value">{{ metrics.precision }}</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Recall:</span>
+                                <span class="result-value">{{ metrics.recall }}</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">F1-Score:</span>
+                                <span class="result-value">{{ metrics.f1_score }}</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">ROC-AUC:</span>
+                                <span class="result-value">{{ metrics.roc_auc }}</span>
+                            </div>
+                            
+                            <!-- Added Best Hyperparameters here -->
+                            {% for result in training_results %}
+                                {% if result.model.lower().replace(' ', '_') == model_name.lower().replace(' ', '_') %}
+                                    {% if result.best_params %}
+                                    <div class="best-params-inline">
+                                        <h5 class="params-title">Best Hyperparameters</h5>
+                                        <ul class="hyperparam-list-small">
+                                            {% for k, v in result.best_params.items() %}
+                                            <li><strong>{{ k }}</strong>: {{ v }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- ROC Curve Section -->
+                    {% if metrics.roc_curve_image %}
+                    <div class="roc-curve-container">
+                        <h5>ROC-AUC Curves</h5>
+                        <img src="data:image/png;base64,{{ metrics.roc_curve_image }}" alt="ROC Curve for {{ model_name }}" class="roc-curve-image">
+                        <p class="curve-description">
+                            This curve shows the trade-off between sensitivity (TPR) and specificity (1-FPR). 
+                            A curve closer to the top-left corner (Perfect Classifier) indicates better performance.
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Confusion Matrices for this model -->
+                    <div class="model-evaluation-row-three" style="margin-top: 30px; box-shadow: none; padding: 0; background: transparent;">
+                        <!-- 2. Confusion Percentage Table -->
+                        {% if metrics.get('confusion_matrix_percentage') %}
+                        <div class="model-item-wrapper">
+                            <h5 class="model-subtitle">Confusion Percentage (%)</h5>
+                            <div class="cm-table-wrapper-small">
+                                <table class="confusion-percentage-table">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            {% if metrics.get('class_labels') %}
+                                                {% for label in metrics.class_labels %}
+                                                <th>Pred: {{ label }}</th>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in metrics.confusion_matrix_percentage %}
+                                        {% set row_idx = loop.index0 %}
+                                        <tr>
+                                            <th class="row-header">Actual: {{ metrics.class_labels[row_idx] if metrics.get('class_labels') else row_idx }}</th>
+                                            {% for cell_percentage in row %}
+                                            {% set col_idx = loop.index0 %}
+                                            {% set is_diagonal = (row_idx == col_idx) %}
+                                            <td class="cm-cell {% if is_diagonal %}cm-tp{% else %}cm-error{% endif %}" 
+                                                style="background-color: {% if is_diagonal %}rgba(40, 167, 69, 0.3){% else %}rgba(220, 53, 69, 0.2){% endif %};">
+                                                <div class="cm-percentage-only">{{ "%.1f"|format(cell_percentage) }}%</div>
+                                            </td>
+                                            {% endfor %}
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- 3. Confusion Matrix -->
+                        {% if metrics.get('confusion_matrix') %}
+                        <div class="model-item-wrapper">
+                            <h5 class="model-subtitle">Confusion Matrix</h5>
+                            <div class="cm-table-wrapper-small">
+                                <table class="confusion-matrix">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            {% if metrics.get('class_labels') %}
+                                                {% for label in metrics.class_labels %}
+                                                <th>Pred: {{ label }}</th>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in metrics.confusion_matrix %}
+                                        {% set row_idx = loop.index0 %}
+                                        <tr>
+                                            <th class="row-header">Actual: {{ metrics.class_labels[row_idx] if metrics.get('class_labels') else row_idx }}</th>
+                                            {% for cell in row %}
+                                            <td class="cm-cell">
+                                                <div class="cm-value">{{ cell }}</div>
+                                            </td>
+                                            {% endfor %}
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <!-- Comparative Analysis Content -->
+                <div id="details-comparative" class="algo-details-content" style="display: none;">
+                    <h4 class="details-title">Overall Comparative Analysis</h4>
+                    <div class="comparative-analysis-box">
+                        {% if best_model %}
+                        <div class="best-model-highlight">
+                            <i class="fas fa-trophy highlight-icon"></i>
+                            <div>
+                                <h5>Best Performing Model: <strong>{{ best_model.model|title|replace('_', ' ') }}</strong></h5>
+                                <p>Based on comprehensive evaluation, the {{ best_model.model|title|replace('_', ' ') }} algorithm shows the most robust performance across multiple metrics.</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="comparison-explanation">
+                            <p>After comparing all trained models, here is the performance summary:</p>
+                            <ul>
+                                {% for model_name, metrics in evaluation_results.items() %}
+                                <li>
+                                    <strong>{{ model_name|title|replace('_', ' ') }}:</strong> 
+                                    {% if 'error' in metrics %}
+                                        <span class="error-text">Evaluation failed.</span>
+                                    {% else %}
+                                        Achieved an accuracy of {{ metrics.accuracy }}, with a balanced F1-score of {{ metrics.f1_score }}.
+                                        {% if model_name == best_model.model %}
+                                            This model is recommended for its high precision and generalizability.
+                                        {% endif %}
+                                    {% endif %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            <p class="summary-conclusion">
+                                The choice of the best model depends on the specific requirements of the prediction task. 
+                                For Obesity Risk Prediction, we prioritize models with high ROC-AUC and F1-score to ensure accurate classification across all risk categories.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <script>
+                function showAlgoDetails(algoName) {
+                    // Hide all detail contents
+                    const contents = document.querySelectorAll('.algo-details-content');
+                    contents.forEach(content => {
+                        content.style.display = 'none';
+                    });
+
+                    // Show the selected one
+                    const selectedContent = document.getElementById('details-' + algoName);
+                    if (selectedContent) {
+                        selectedContent.style.display = 'block';
+                        // Scroll to results
+                        selectedContent.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+
+                    // Update button active state
+                    const buttons = document.querySelectorAll('.algo-btn');
+                    buttons.forEach(btn => {
+                        btn.classList.remove('active');
+                        if (btn.innerText.toLowerCase().includes(algoName.replace('_', ' ')) || 
+                            (algoName === 'comparative' && btn.innerText === 'Overall Comparative')) {
+                            btn.classList.add('active');
+                        }
+                    });
+                }
+                
+                // Show the best model by default if it exists
+                window.onload = function() {
+                    {% if best_model %}
+                    showAlgoDetails('{{ best_model.model }}');
+                    {% endif %}
+                };
+            </script>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

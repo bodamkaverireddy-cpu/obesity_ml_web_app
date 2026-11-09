@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Register - Obesity Risk Prediction{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-box">
+        <div class="auth-header">
+            <h1>Create Account</h1>
+            <p class="auth-subtitle">Join us to start predicting</p>
+        </div>
+        <form method="POST" action="{{ url_for('register') }}">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required placeholder="Choose a username">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Create a password">
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" required placeholder="Confirm your password">
+            </div>
+            <button type="submit" class="btn btn-primary btn-large">Create Account</button>
+        </form>
+        <p class="auth-link">Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+    </div>
+</div>
+{% endblock %}
